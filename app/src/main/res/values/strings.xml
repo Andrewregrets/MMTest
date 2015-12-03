@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">MMTest</string>
+    <string name="action_settings">Settings</string>
+    <string name="about">This application was created by musician and programmer - Andrew Milko for beginner- and advanced-level musicians, who would like to improve their skills of quick thinking in terms of music theory</string>
+</resources>
