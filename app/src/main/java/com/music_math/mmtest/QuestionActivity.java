@@ -1,10 +1,12 @@
 package com.music_math.mmtest;
 
 import android.app.Activity;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 
-public class QuestionActivity extends Activity {
+import static android.database.sqlite.SQLiteDatabase.openDatabase;
 
+public class QuestionActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
