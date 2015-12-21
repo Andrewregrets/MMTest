@@ -33,9 +33,9 @@
     <ListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/listView2"
-        android:layout_gravity="center_horizontal"
-        android:layout_weight="1" />
+        android:id="@+id/listViewCategortes"
+        android:layout_weight="1"
+        android:choiceMode="none" />
 
     <Button
         android:layout_width="fill_parent"
