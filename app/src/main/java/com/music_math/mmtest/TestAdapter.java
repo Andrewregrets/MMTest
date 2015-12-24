@@ -56,11 +56,11 @@ public class TestAdapter
         mDbHelper.close();
     }
 
-    public Cursor getTestData()
+    public Cursor getTestData(String tableName)
     {
         try
         {
-            String sql ="SELECT * FROM A";
+            String sql ="SELECT * FROM " + tableName;
 
             Cursor mCur = mDb.rawQuery(sql, null);
             if (mCur!=null)

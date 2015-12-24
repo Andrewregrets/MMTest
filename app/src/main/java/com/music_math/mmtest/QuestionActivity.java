@@ -17,8 +17,11 @@ import android.widget.Toast;
 public class QuestionActivity extends Activity implements View.OnClickListener {
     private static final int ANSWERS_NUMBER = 4;
     private static final int FIRST_WRONG_ANSWER_COLUMN = 2;
-    private static final int MAX_QUESTION_NUMBER = 10;
+    //private static final int MAX_QUESTION_NUMBER = 10;
+    private static final String TABLE_NAME_TAG = "TableName";
+    private static final String QUESTION_NUMBER_TAG = "QuestionNumber";
 
+    private String questionTableName;
     TextView textViewQuestion;
     TextView textViewQNum;
 
@@ -33,11 +36,18 @@ public class QuestionActivity extends Activity implements View.OnClickListener {
     private Toast rightToast;
     private int rightAnswersNum = 0;
     private int missedAnswersNum = 0;
+    private int questionNum;
+    private int rightAnswersRowNum = 0;
+    private int rightAnswersRowNumTemp = 0;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Intent intent = getIntent();
+        questionTableName = intent.getStringExtra(TABLE_NAME_TAG);
+        questionNum = intent.getIntExtra(QUESTION_NUMBER_TAG, 0);
 
         linkViews();
         rightToast = Toast.makeText(getApplicationContext(), "Right you are!", Toast.LENGTH_SHORT);
@@ -47,7 +57,7 @@ public class QuestionActivity extends Activity implements View.OnClickListener {
         mDbHelper.createDatabase();
         mDbHelper.open();
 
-        questionData = mDbHelper.getTestData();
+        questionData = mDbHelper.getTestData(questionTableName);
 
         for(int i = 0; i < ANSWERS_NUMBER; i++)
             btnsAnswer[i].setOnClickListener(this);
@@ -63,59 +73,30 @@ public class QuestionActivity extends Activity implements View.OnClickListener {
         if(validateAnswer(v)) {
             rightToast.show();
             rightAnswersNum++;
+            rightAnswersRowNumTemp++;
         }
-        else wrongToast.show();
-
+        else {
+            if(rightAnswersRowNumTemp > rightAnswersRowNum)
+                rightAnswersRowNum = rightAnswersRowNumTemp;
+            wrongToast.show();
+            rightAnswersRowNumTemp = 0;
+        }
         saveAnswerStatistic();
         questionData.moveToNext();
         currentQuestion++;
-        if(currentQuestion < MAX_QUESTION_NUMBER)
+        if(currentQuestion < questionNum)
             fillViews();
         else{
+            if(rightAnswersRowNumTemp > rightAnswersRowNum)
+                rightAnswersRowNum = rightAnswersRowNumTemp;
+
             Intent intent = new Intent(this, StatisticsActivity.class);
-            intent.putExtra("Maximum answers", MAX_QUESTION_NUMBER);
+            intent.putExtra("Maximum answers", questionNum);
             intent.putExtra("Right answers", rightAnswersNum);
+            intent.putExtra("Answers in a row", rightAnswersRowNum);
             intent.putExtra("Missed answers", missedAnswersNum);
             startActivity(intent);
         }
-    }
-
-    private void linkViews()
-    {
-        setContentView(R.layout.activity_question);
-
-        textViewQNum = (TextView) findViewById(R.id.textViewQNum);
-        textViewQuestion = (TextView) findViewById(R.id.textViewQuestion);
-
-        btnsAnswer = new Button[4];
-        btnsAnswer[0] = (Button) findViewById(R.id.btnAnswer0);
-        btnsAnswer[1] = (Button) findViewById(R.id.btnAnswer1);
-        btnsAnswer[2] = (Button) findViewById(R.id.btnAnswer2);
-        btnsAnswer[3] = (Button) findViewById(R.id.btnAnswer3);
-    }
-
-    private void fillViews() {
-        textViewQNum.setText(String.valueOf(currentQuestion+1) + '/' + String.valueOf(MAX_QUESTION_NUMBER));
-
-        textViewQuestion.setText(questionData.getString(0));
-        rightAnswer = questionData.getString(1);
-
-        int randomNum;
-        Random a = new Random();
-        randomNum = a.nextInt(3);
-
-        btnsAnswer[randomNum].setText(rightAnswer);
-
-        for(int i = 0, j = FIRST_WRONG_ANSWER_COLUMN; i < ANSWERS_NUMBER; i++)
-        {
-            if(i != randomNum){
-                btnsAnswer[i].setText(questionData.getString(j++));
-            }
-        }
-    }
-
-    private void saveAnswerStatistic() {
-
     }
 
     private boolean validateAnswer(View v) {
@@ -140,4 +121,44 @@ public class QuestionActivity extends Activity implements View.OnClickListener {
             else return false;
         else return true;
     }
+
+    private void linkViews()
+    {
+        setContentView(R.layout.activity_question);
+
+        textViewQNum = (TextView) findViewById(R.id.textViewQNum);
+        textViewQuestion = (TextView) findViewById(R.id.textViewQuestion);
+
+        btnsAnswer = new Button[4];
+        btnsAnswer[0] = (Button) findViewById(R.id.btnAnswer0);
+        btnsAnswer[1] = (Button) findViewById(R.id.btnAnswer1);
+        btnsAnswer[2] = (Button) findViewById(R.id.btnAnswer2);
+        btnsAnswer[3] = (Button) findViewById(R.id.btnAnswer3);
+    }
+
+    private void fillViews() {
+        textViewQNum.setText(String.valueOf(currentQuestion+1) + '/' + String.valueOf(questionNum));
+
+        textViewQuestion.setText(questionData.getString(0));
+        rightAnswer = questionData.getString(1);
+
+        int randomNum;
+        Random a = new Random();
+        randomNum = a.nextInt(3);
+
+        btnsAnswer[randomNum].setText(rightAnswer);
+
+        for(int i = 0, j = FIRST_WRONG_ANSWER_COLUMN; i < ANSWERS_NUMBER; i++)
+        {
+            if(i != randomNum){
+                btnsAnswer[i].setText(questionData.getString(j++));
+            }
+        }
+    }
+
+    private void saveAnswerStatistic() {
+
+    }
+
+
 }

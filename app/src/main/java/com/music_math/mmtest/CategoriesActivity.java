@@ -13,37 +13,66 @@ import android.widget.SimpleCursorAdapter;
 import android.database.Cursor;
 import java.sql.SQLException;
 
-public class CategoriesActivity extends Activity {
-//    DatabaseHelper sqlHelper;
-//    Cursor userCursor;
-//    SimpleCursorAdapter userAdapter;
+public class CategoriesActivity extends Activity implements View.OnClickListener{
+    private static final String TABLE_NAME_TAG = "TableName";
+    private static final String QUESTION_NUMBER_TAG = "QuestionNumber";
+
+    private static final int CATEGORIES_NUM = 2;
+    Button btnOk;
+    Button btnsCategory[];// Add dependency
+
+    private Cursor categoriesData;
+    private static final String CATEGORIES_NAME = "Categories";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        linkViews();
+
+        TestAdapter mDbHelper = new TestAdapter(this);
+        mDbHelper.createDatabase();
+        mDbHelper.open();
+
+        categoriesData = mDbHelper.getTestData(CATEGORIES_NAME);
+///////////////////////////// Add dependency
+        for (int i = 0; i < CATEGORIES_NUM; i++) {
+            btnsCategory[i].setText(categoriesData.getString(0));
+            categoriesData.moveToNext();
+        }
+/////////////////////////////
+
+        mDbHelper.close();
+
+        btnOk.setOnClickListener(this);
+        for (int i = 0; i < CATEGORIES_NUM; i++)
+            btnsCategory[i].setOnClickListener(this);
+    }
+
+    private void linkViews() {
         setContentView(R.layout.activity_categories);
-        Button btnOk = (Button) findViewById(R.id.buttonOk);
-        ListView listCategory = (ListView) findViewById(R.id.listViewCategortes);
+        btnOk = (Button) findViewById(R.id.buttonOk);
+        btnsCategory = new Button[2];
+        btnsCategory[0] = (Button) findViewById(R.id.btnCategory0);
+        btnsCategory[1] = (Button) findViewById(R.id.btnCategory1);
+    }
 
-//        sqlHelper = new DatabaseHelper(getApplicationContext());
-//        // создаем базу данных
-//        sqlHelper.create_db();
+    @Override
+    public void onClick(View v) {
 
-//        try {
-//            sqlHelper.open();
-//            userCursor = sqlHelper.database.rawQuery("select * from " + DatabaseHelper.TABLE, null);
-//            String[] data = new String[]{DatabaseHelper.COLUMN_QUESTION, DatabaseHelper.COLUMN_RIGHT_ANSWER,
-//                    DatabaseHelper.COLUMN_WRONG_ANSWER0,DatabaseHelper.COLUMN_WRONG_ANSWER1, DatabaseHelper.COLUMN_WRONG_ANSWER2};
-//            userAdapter = new SimpleCursorAdapter(this, android.R.layout.two_line_list_item,
-//                    userCursor, data, new int[]{android.R.id.text1, android.R.id.text2}, 0);
-//            listCategory.setAdapter(userAdapter);
-//        }
-//        catch (SQLException ex){}
-        btnOk.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(CategoriesActivity.this, QuestionActivity.class));
-            }
-        });
+        if(v.getId() == R.id.btnCategory0)
+        {
+            Intent intent = new Intent(this, QuestionActivity.class);
+            intent.putExtra(TABLE_NAME_TAG, btnsCategory[0].getText());
+            intent.putExtra(QUESTION_NUMBER_TAG, 13);/////
+            startActivity(intent);
+        }
+        if(v.getId() == R.id.btnCategory1)
+        {
+            Intent intent = new Intent(this, QuestionActivity.class);
+            intent.putExtra(TABLE_NAME_TAG, btnsCategory[1].getText());
+            intent.putExtra(QUESTION_NUMBER_TAG, 10);/////
+            startActivity(intent);
+        }
     }
 }
